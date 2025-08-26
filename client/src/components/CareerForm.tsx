@@ -19,7 +19,7 @@ const MAJORS = [
   "Finance"
 ];
 
-const SKILLS = [
+const ALL_SKILLS = [
   // Technical Skills
   "Web Programming",
   "Mobile Development", 
@@ -70,6 +70,110 @@ const SKILLS = [
   "Resource Management",
   "Logistics Coordination"
 ];
+
+const MAJOR_SKILLS_MAPPING: Record<string, string[]> = {
+  "Information Technology": [
+    "Web Programming",
+    "Mobile Development",
+    "Database Management",
+    "System Administration",
+    "Cybersecurity",
+    "Data Analysis",
+    "Machine Learning",
+    "Problem Solving",
+    "Project Management",
+    "Quality Assurance",
+    "Documentation",
+    "Process Improvement"
+  ],
+  "Software Engineering": [
+    "Web Programming",
+    "Mobile Development",
+    "Database Management",
+    "System Administration",
+    "Problem Solving",
+    "Quality Assurance",
+    "Project Management",
+    "Documentation",
+    "Process Improvement",
+    "Team Leadership",
+    "Strategic Planning"
+  ],
+  "Business Administration": [
+    "Strategic Planning",
+    "Project Management",
+    "Team Leadership",
+    "Financial Planning",
+    "Market Research",
+    "Public Speaking",
+    "Negotiation",
+    "Networking",
+    "Process Improvement",
+    "Resource Management",
+    "Sales/Persuasion"
+  ],
+  "Marketing": [
+    "Social Media Management",
+    "Content Writing",
+    "Market Research",
+    "Graphic Design",
+    "Public Speaking",
+    "Sales/Persuasion",
+    "Photography",
+    "Video Production",
+    "Event Planning",
+    "Data Analysis",
+    "Networking"
+  ],
+  "Graphic Design": [
+    "Graphic Design",
+    "UI/UX Design",
+    "Drawing/Illustration",
+    "3D Modeling",
+    "Photography",
+    "Video Production",
+    "Content Writing",
+    "Social Media Management",
+    "Project Management",
+    "Time Management"
+  ],
+  "Digital Media": [
+    "Video Production",
+    "Photography",
+    "Graphic Design",
+    "Social Media Management",
+    "Content Writing",
+    "UI/UX Design",
+    "Music Production",
+    "3D Modeling",
+    "Project Management",
+    "Event Planning"
+  ],
+  "International Business": [
+    "Language Translation",
+    "Negotiation",
+    "Strategic Planning",
+    "Market Research",
+    "Financial Planning",
+    "Public Speaking",
+    "Networking",
+    "Project Management",
+    "Sales/Persuasion",
+    "Research & Analysis"
+  ],
+  "Finance": [
+    "Financial Planning",
+    "Data Analysis",
+    "Research & Analysis",
+    "Strategic Planning",
+    "Problem Solving",
+    "Market Research",
+    "Negotiation",
+    "Project Management",
+    "Quality Assurance",
+    "Documentation"
+  ]
+};
 
 const WORK_ENVIRONMENTS = [
   {
@@ -287,12 +391,29 @@ export default function CareerForm({ onSuccess }: CareerFormProps) {
     },
   });
 
+  const [showAllSkills, setShowAllSkills] = useState(false);
+
+  const getFilteredSkills = () => {
+    if (!major || showAllSkills) {
+      return ALL_SKILLS;
+    }
+    return MAJOR_SKILLS_MAPPING[major] || ALL_SKILLS;
+  };
+
   const handleSkillToggle = (skill: string) => {
     if (selectedSkills.includes(skill)) {
       setSelectedSkills(selectedSkills.filter(s => s !== skill));
     } else if (selectedSkills.length < 3) {
       setSelectedSkills([...selectedSkills, skill]);
     }
+  };
+
+  const handleMajorChange = (selectedMajor: string) => {
+    setMajor(selectedMajor);
+    // Reset selected skills when major changes
+    setSelectedSkills([]);
+    // Reset show all skills toggle
+    setShowAllSkills(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -333,7 +454,7 @@ export default function CareerForm({ onSuccess }: CareerFormProps) {
               id="major"
               className="form-select"
               value={major}
-              onChange={(e) => setMajor(e.target.value)}
+              onChange={(e) => handleMajorChange(e.target.value)}
               required
               data-testid="select-major"
             >
@@ -353,10 +474,31 @@ export default function CareerForm({ onSuccess }: CareerFormProps) {
               2. Your favorite skills: What are you naturally good at? (Select up to 3)
             </label>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '15px' }}>
-              Choose skills you enjoy using or would like to develop further
+              {major ? `Skills relevant to ${major}:` : 'Choose skills you enjoy using or would like to develop further'}
             </p>
+            {major && (
+              <div style={{ marginBottom: '15px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAllSkills(!showAllSkills)}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid var(--google-blue)',
+                    color: 'var(--google-blue)',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  data-testid="toggle-all-skills"
+                >
+                  {showAllSkills ? 'Show relevant skills only' : 'Show all skills'}
+                </button>
+              </div>
+            )}
             <div className="skill-tags">
-              {SKILLS.map((skill) => (
+              {getFilteredSkills().map((skill) => (
                 <div
                   key={skill}
                   className={`skill-tag ${selectedSkills.includes(skill) ? 'selected' : ''}`}
